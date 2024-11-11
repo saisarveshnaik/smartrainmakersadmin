@@ -21,10 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if all necessary data is provided via form data (POST)
     if (isset($_POST['name'], $_POST['email'], $_POST['password'], $_POST['confirm_password'])) {
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
+        $name = htmlspecialchars(trim($_POST['name']));
+        $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+        $password = htmlspecialchars(trim($_POST['password']));
+        $confirm_password = htmlspecialchars(trim($_POST['confirm_password']));
+
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid email format.']);
+            exit;
+        }
 
         // Validate if password and confirm_password match
         if ($password !== $confirm_password) {
@@ -61,10 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Check if the insertion was successful
             if ($stmt->rowCount() > 0) {
+                http_response_code(201);  // Created
                 echo json_encode(['message' => 'Admin added successfully.']);
             } else {
                 http_response_code(500);
-                echo json_encode(['error' => 'Failed to add admin.']);
+                $errorInfo = $stmt->errorInfo();
+                echo json_encode(['error' => 'Failed to add admin: ' . $errorInfo[2]]);
             }
         } catch (Exception $e) {
             // Error handling

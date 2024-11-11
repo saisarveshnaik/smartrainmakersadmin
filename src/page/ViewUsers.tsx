@@ -1,41 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/ViewUsers.css';
+import axios from 'axios';
 import { Table, Button, Modal } from 'react-bootstrap';
 
+interface User {
+    id: number;
+    user_name: string;
+    email: string;
+    created_at: string;
+}
+
 const ViewUsers: React.FC = () => {
+    const [users, setUsers] = useState<User[]>([]);
     const [showModal, setShowModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const users = [
-        { id: 1, name: 'Alice Johnson', wallet: '0x123...abc', dateJoined: '2023-01-15', referer: 'john_doe', team: 'Team A' },
-        { id: 2, name: 'Bob Smith', wallet: '0x456...def', dateJoined: '2023-02-20', referer: 'jane_smith', team: 'Team B' },
-        { id: 3, name: 'Charlie Brown', wallet: '0x789...ghi', dateJoined: '2023-03-10', referer: 'alex_jones', team: 'Team C' },
-    ];
+    useEffect(() => {
+        // Fetch users from the API
+        const fetchUsers = async () => {
+            try {
+                const response = await axios.get('http://localhost/smartrainmakers/pages/view_users_GET.php');
+                setUsers(response.data.users);
+            } catch (error) {
+                setError('Failed to fetch users');
+            }
+        };
+        fetchUsers();
+    }, []);
 
-    const handleShowModal = () => setShowModal(true);
+    const handleShowModal = (user: User) => {
+        setSelectedUser(user);
+        setShowModal(true);
+    };
+
     const handleCloseModal = () => setShowModal(false);
 
     return (
         <div className="container mt-4">
             <h1>View Users</h1>
+            {error && <p className="error-message">{error}</p>}
             <Table striped bordered hover responsive className="mt-3">
                 <thead>
                     <tr>
-                        <th>Name/Wallet</th>
+                        <th>Name/Email</th>
                         <th>Date Joined</th>
-                        <th>Referer Username</th>
-                        <th>Team</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {users.map(user => (
                         <tr key={user.id}>
-                            <td>{user.name} / {user.wallet}</td>
-                            <td>{user.dateJoined}</td>
-                            <td>{user.referer}</td>
-                            <td>{user.team}</td>
+                            <td>{user.user_name} / {user.email}</td>
+                            <td>{new Date(user.created_at).toLocaleDateString()}</td>
                             <td>
-                                <Button className="view-more-btn" onClick={handleShowModal}>View More</Button>
+                                <Button className="view-more-btn" onClick={() => handleShowModal(user)}>View More</Button>
                             </td>
                         </tr>
                     ))}
@@ -48,32 +67,27 @@ const ViewUsers: React.FC = () => {
                     <Modal.Title>User Details</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <div className="user-info">
-                        <div className="user-info-row">
-                            <span className="label">Email ID:</span>
-                            <span className="value">example@example.com</span>
+                    {selectedUser && (
+                        <div className="user-info">
+                            <div className="user-info-row">
+                                <span className="label">Email ID:</span>
+                                <span className="value">{selectedUser.email}</span>
+                            </div>
+                            <div className="user-info-row">
+                                <span className="label">Date Joined:</span>
+                                <span className="value">{new Date(selectedUser.created_at).toLocaleDateString()}</span>
+                            </div>
+                            {/* Additional placeholders for details; these could be extended with more specific data if available */}
+                            <div className="user-info-row">
+                                <span className="label">Payout Wallet:</span>
+                                <span className="value">[Data Placeholder]</span>
+                            </div>
+                            <div className="user-info-row">
+                                <span className="label">Premium Level:</span>
+                                <span className="value">[Data Placeholder]</span>
+                            </div>
                         </div>
-                        <div className="user-info-row">
-                            <span className="label">Email Verified:</span>
-                            <span className="value">Yes</span>
-                        </div>
-                        <div className="user-info-row">
-                            <span className="label">Payout Wallet:</span>
-                            <span className="value">0x123...abc</span>
-                        </div>
-                        <div className="user-info-row">
-                            <span className="label">Premium Level:</span>
-                            <span className="value">Gold</span>
-                        </div>
-                        <div className="user-info-row">
-                            <span className="label">Rainmaker Level:</span>
-                            <span className="value">Level 3</span>
-                        </div>
-                        <div className="user-info-row">
-                            <span className="label">Total Earned:</span>
-                            <span className="value">$5000</span>
-                        </div>
-                    </div>
+                    )}
                 </Modal.Body>
             </Modal>
         </div>

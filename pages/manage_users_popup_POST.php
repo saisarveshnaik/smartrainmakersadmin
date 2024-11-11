@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $payout_wallet = $_POST['payout_wallet'];
 
         try {
-            // Prepare the query to update the user details without updating user_name
+            // Prepare the query to update the user details (password and payout_wallet only)
             $stmt = $pdo->prepare("
                 UPDATE users 
                 SET password = :password, payout_wallet = :payout_wallet
@@ -56,4 +56,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);
 }
+
 ?>
