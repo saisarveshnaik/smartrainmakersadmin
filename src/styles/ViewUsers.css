@@ -1,0 +1,100 @@
+h1{
+    color: #ffffff;
+}
+
+/* .container{
+    min-height: 100vh;
+} */
+
+
+
+  /* ViewUsers.css */
+  .view-more-btn {
+    background: linear-gradient(135deg, #1f1f1f, #333);
+    color: #e0e0e0;
+    border: none;
+    padding: 0.4rem 1rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .view-more-btn:hover {
+    background: linear-gradient(135deg, #333, #1f1f1f);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .view-more-btn:focus {
+    outline: none;
+    box-shadow: 0px 0px 0px 2px #555;
+  }
+
+/* Dark theme for modal background and text */
+.modal-content {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+.modal-header {
+    border-bottom: 1px solid #444;
+}
+
+.modal-title {
+    color: #e0e0e0;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Stylish Close Button */
+.modal-header .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: #999;
+    transition: color 0.3s, transform 0.2s;
+}
+
+.modal-header .btn-close:hover {
+    color: #f5f5f5;
+    transform: rotate(90deg);
+}
+
+.modal-header .btn-close::before {
+    content: '✖';
+}
+
+/* User Info Styling */
+.user-info {
+    padding: 0.5rem;
+}
+
+.user-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #444;
+}
+
+.label {
+    color: #b3b3b3;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.value {
+    color: #e0e0e0;
+    font-size: 0.95rem;
+}
+
+.user-info-row:last-child {
+    border-bottom: none;
+}

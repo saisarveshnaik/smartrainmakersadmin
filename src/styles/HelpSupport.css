@@ -1,0 +1,52 @@
+/* Styles for Help and Support page */
+.view-message-btn {
+    background-color: #7289da;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 8px 16px;
+    transition: background-color 0.3s, transform 0.2s;
+    border-radius: 4px;
+}
+
+.view-message-btn:hover {
+    background-color: #5b6eae;
+    transform: scale(1.05);
+}
+
+/* Modal for message */
+.modal-content {
+    background-color: #2c2f33;
+    color: #fff;
+    border-radius: 8px;
+}
+
+.modal-header, .modal-body {
+    border: none;
+}
+
+.message-textarea {
+    width: 100%;
+    background-color: #23272a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 14px;
+    resize: none;
+}
+
+.message-textarea:focus {
+    outline: none;
+    border-color: #7289da;
+}
+
+/* Table Styles */
+.table th, .table td {
+    color: #fff;
+    text-align: center;
+}
+
+.table {
+    background-color: #23272a;
+}
