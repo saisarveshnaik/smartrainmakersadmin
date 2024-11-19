@@ -1,10 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal } from 'react-bootstrap';
+import axios from 'axios';
 import '../styles/HelpSupport.css';
 
+interface SupportRequest {
+    id: number;
+    user_name: string;
+    direct_team: string;
+    message: string;
+}
+
 const HelpSupport: React.FC = () => {
+    const [supportRequests, setSupportRequests] = useState<SupportRequest[]>([]);
     const [showMessage, setShowMessage] = useState(false);
     const [currentMessage, setCurrentMessage] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchSupportRequests = async () => {
+            try {
+                const response = await axios.get('http://localhost/smartrainmakers/pages/helpsupport_GET.php');
+                if (response.data.status === 'success') {
+                    setSupportRequests(response.data.data);
+                } else {
+                    setError('Error fetching support requests. Please try again later.');
+                }
+            } catch (err) {
+                setError('Error fetching support requests. Please try again later.');
+                console.error('Error fetching support requests:', err);
+            }
+        };
+
+        fetchSupportRequests();
+    }, []);
 
     const handleViewMessage = (message: string) => {
         setCurrentMessage(message);
@@ -13,17 +41,10 @@ const HelpSupport: React.FC = () => {
 
     const handleClose = () => setShowMessage(false);
 
-    // Placeholder user data
-    const supportRequests = [
-        { id: 1, username: 'Alice', team: 'Team A', message: 'Issue with login' },
-        { id: 2, username: 'Bob', team: 'Team B', message: 'Unable to withdraw funds' },
-        { id: 3, username: 'Charlie', team: 'Team C', message: 'Account locked' },
-        // Add more as needed
-    ];
-
     return (
         <div className="container mt-4">
             <h1>Help and Support</h1>
+            {error && <p className="text-danger">{error}</p>}
             <Table striped bordered hover responsive className="mt-3">
                 <thead>
                     <tr>
@@ -37,8 +58,8 @@ const HelpSupport: React.FC = () => {
                     {supportRequests.map((request, index) => (
                         <tr key={request.id}>
                             <td>{index + 1}</td>
-                            <td>{request.username}</td>
-                            <td>{request.team}</td>
+                            <td>{request.user_name}</td>
+                            <td>{request.direct_team}</td>
                             <td>
                                 <Button
                                     variant="info"

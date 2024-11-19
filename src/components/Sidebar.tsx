@@ -1,22 +1,30 @@
+// Sidebar.tsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Sidebar.css';
 import { FaChartLine, FaCogs, FaEnvelope, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
-const Sidebar: React.FC = () => {
-  // States for managing collapsible sections
+interface SidebarProps {
+  handleLogout: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ handleLogout }) => {
   const [themeOpen, setThemeOpen] = useState(true);
   const [componentsOpen, setComponentsOpen] = useState(true);
-  const [extrasOpen, setExtrasOpen] = useState(true);
 
   const toggleSection = (section: string) => {
     if (section === 'theme') {
       setThemeOpen(!themeOpen);
     } else if (section === 'components') {
       setComponentsOpen(!componentsOpen);
-    } else if (section === 'extras') {
-      setExtrasOpen(!extrasOpen);
     }
+  };
+
+  const navigate = useNavigate();
+
+  const onLogoutClick = () => {
+    handleLogout();
+    navigate('/login'); // Redirect to login page
   };
 
   return (
@@ -31,39 +39,38 @@ const Sidebar: React.FC = () => {
       </div>
 
       <ul className="list-unstyled">
-      <Link to="/">
-        <li className="sidebar-item mb-3">
-          <FaChartLine className="sidebar-icon" /> Dashboard
-        </li>
-      </Link>
+        <Link to="/">
+          <li className="sidebar-item mb-3">
+            <FaChartLine className="sidebar-icon" /> Dashboard
+          </li>
+        </Link>
       </ul>
 
       {/* Theme Section with Collapsible */}
       <h6 onClick={() => toggleSection('theme')} className="sidebar-toggle">
         USERS {themeOpen ? <FaChevronUp /> : <FaChevronDown />}
       </h6>
-      
       {themeOpen && (
         <ul className="list-unstyled">
           <Link to="/view-users">
-           <li className="sidebar-item mb-3">
-            <FaChartLine className="sidebar-icon" />View Users
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaChartLine className="sidebar-icon" /> View Users
+            </li>
           </Link>
           <Link to="/manage-users">
-          <li className="sidebar-item mb-3">
-            <FaCogs className="sidebar-icon" /> Manage Users
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaCogs className="sidebar-icon" /> Manage Users
+            </li>
           </Link>
           <Link to="/transactions">
-          <li className="sidebar-item mb-3">
-            <FaCogs className="sidebar-icon" /> Transactions
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaCogs className="sidebar-icon" /> Transactions
+            </li>
           </Link>
           <Link to="/withdrawals">
-          <li className="sidebar-item mb-3">
-            <FaCogs className="sidebar-icon" /> Withdrawals
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaCogs className="sidebar-icon" /> Withdrawals
+            </li>
           </Link>
         </ul>
       )}
@@ -75,44 +82,42 @@ const Sidebar: React.FC = () => {
       {componentsOpen && (
         <ul className="list-unstyled">
           <Link to="/add-admin">
-          <li className="sidebar-item mb-3">
-            <FaChartLine className="sidebar-icon" /> Add Admin
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaChartLine className="sidebar-icon" /> Add Admin
+            </li>
           </Link>
           <Link to="/add-users">
-          <li className="sidebar-item mb-3">
-            <FaCogs className="sidebar-icon" /> Add Users
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaCogs className="sidebar-icon" /> Add Users
+            </li>
           </Link>
           <Link to="/view-teams">
-          <li className="sidebar-item mb-3">
-            <FaCogs className="sidebar-icon" /> View Teams
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaCogs className="sidebar-icon" /> View Teams
+            </li>
           </Link>
           <Link to="/view-admin-balance">
-          <li className="sidebar-item mb-3">
-            <FaCogs className="sidebar-icon" /> View Admin Balance
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaCogs className="sidebar-icon" /> View Admin Balance
+            </li>
           </Link>
           <li className="sidebar-item mb-3">
             <FaCogs className="sidebar-icon" /> Settings
           </li>
           <Link to="/help-and-support">
-          <li className="sidebar-item mb-3">
-            <FaCogs className="sidebar-icon" /> Help & Support
-          </li>
+            <li className="sidebar-item mb-3">
+              <FaCogs className="sidebar-icon" /> Help & Support
+            </li>
           </Link>
-          <li className="sidebar-item mb-3">
+          <li className="sidebar-item mb-3" onClick={onLogoutClick}>
             <FaCogs className="sidebar-icon" /> Logout
           </li>
         </ul>
       )}
-       
-      <div className='sidebarfooter'> 
-      <h6 className='smart'>SmartRainmakers Inc.</h6>
-      </div>
 
-      
+      <div className="sidebarfooter">
+        <h6 className="smart">SmartRainmakers Inc.</h6>
+      </div>
     </div>
   );
 };

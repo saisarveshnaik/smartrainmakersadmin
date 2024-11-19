@@ -1,19 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/Withdrawals.css';
 import { Table, Button } from 'react-bootstrap';
 
+interface Withdrawal {
+    id: number;
+    username: string;
+    wallet: string;
+    date: string;
+    hash: string;
+    amount: number;
+    type: string;
+}
+
 const Withdrawals: React.FC = () => {
-    // Placeholder withdrawal data
-    const withdrawals = [
-        { id: 1, username: 'Alice Johnson', wallet: '0x123...abc', date: '2023-01-15', hash: '0xABC123', amount: 150, type: 'Withdrawal' },
-        { id: 2, username: 'Bob Smith', wallet: '0x456...def', date: '2023-02-20', hash: '0xDEF456', amount: 200, type: 'Withdrawal' },
-        { id: 3, username: 'Charlie Brown', wallet: '0x789...ghi', date: '2023-03-10', hash: '0xGHI789', amount: 300, type: 'Withdrawal' },
-        // Add more withdrawal data as needed
-    ];
+    const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Fetch withdrawal data from the API
+        fetch('http://localhost/smartrainmakers/pages/withdrawals_GET.php')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch withdrawals');
+                }
+                return response.json();
+            })
+            .then(data => setWithdrawals(data.withdrawals))
+            .catch(err => setError(err.message));
+    }, []);
 
     return (
         <div className="container mt-4">
             <h1>Withdrawals</h1>
+            {error && <p className="error">{error}</p>}
             <Table striped bordered hover responsive className="mt-3">
                 <thead>
                     <tr>

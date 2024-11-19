@@ -1,6 +1,6 @@
 // App.tsx
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/global.css';
 import Sidebar from './components/Sidebar';
@@ -34,6 +34,11 @@ const App: React.FC = () => {
     setIsAuthenticated(!!authToken);
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('authToken'); // Clear authentication token
+    setIsAuthenticated(false); // Update authentication state
+  };
+
   return (
     <Router>
       <div className="app-container d-flex">
@@ -44,7 +49,7 @@ const App: React.FC = () => {
           <>
             {/* Sidebar */}
             <div className={`sidebar ${isSidebarOpen ? '' : 'sidebar-hidden'}`}>
-              <Sidebar />
+              <Sidebar handleLogout={handleLogout} /> {/* Pass handleLogout as prop */}
             </div>
 
             {/* Main content area */}
@@ -89,4 +94,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default App
