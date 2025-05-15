@@ -1,68 +1,59 @@
-// InfoCard.tsx
 import React from 'react';
+import { useDashboard } from '../context/DashboardContext';
 import '../styles/InfoCard.css';
 
 const InfoCard: React.FC = () => {
+  const { data, loading } = useDashboard();
+
+  if (loading) return <p>Loading info cards...</p>;
+  if (!data || !data.infoCards) return <p>No data available.</p>;
+
   return (
     <div className="container">
       <div className="row mt-4">
-        {/* Card 1 */}
+        {/* Card 1 - Total Users */}
         <div className="col-md-3">
           <div className="card shadow-sm">
-            {/* <img
-              src="https://via.placeholder.com/350x200"  
-              alt="Card 1"
-              className="card-img-top"
-            /> */}
             <div className="card-body card1">
-              <h5 className="card-title">26</h5>
-              <p className="card-text">
-              Total Users
-              </p>
+              <h5 className="card-title">{data.infoCards.totalUsers}</h5>
+              <p className="card-text">Total Users</p>
               <a href="#" className="btn btn-primary">View</a>
             </div>
           </div>
         </div>
 
-        {/* Card 2 */}
-        <div className="col-md-3 ">
+        {/* Card 2 - Admin Income */}
+        <div className="col-md-3">
           <div className="card shadow-sm">
             <div className="card-body card2">
-              <h5 className="card-title">$6.200 </h5>
-              <p className="card-text">
-              Admin Income
-              </p>
+              <h5 className="card-title">{data.infoCards.activatedUsers}</h5>
+              <p className="card-text">Activated Users</p>
               <a href="#" className="btn btn-primary">View</a>
             </div>
           </div>
         </div>
 
-        {/* Card 3 */}
-        <div className="col-md-3 ">
+        {/* Card 3 - Total User Earnings */}
+        <div className="col-md-3">
           <div className="card shadow-sm">
             <div className="card-body card3">
-              <h5 className="card-title">$4456.200</h5>
-              <p className="card-text">
-              Total User Earnings
-              </p>
+              <h5 className="card-title">${data.infoCards.totalUserEarnings.toFixed(2)}</h5>
+              <p className="card-text">Total User Earnings</p>
               <a href="#" className="btn btn-primary">View</a>
             </div>
           </div>
         </div>
 
-        {/* Card 4 */}
-        <div className="col-md-3 ">
+        {/* Card 4 - Payouts Sent */}
+        <div className="col-md-3">
           <div className="card shadow-sm">
             <div className="card-body card4">
-              <h5 className="card-title">44</h5>
-              <p className="card-text">
-              Payouts Sent
-              </p>
+              <h5 className="card-title">{data.infoCards.depositedAmount.toFixed(2)}</h5>
+              <p className="card-text">Deposited Amount</p>
               <a href="#" className="btn btn-primary">View</a>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

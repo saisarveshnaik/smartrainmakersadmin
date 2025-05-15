@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ENDPOINTS } from '../endpoints';
 
 interface LoginPageProps {
   setIsAuthenticated: (auth: boolean) => void;
@@ -18,12 +19,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost/smartrainmakers/pages/login.php', {
+      const response = await axios.post(ENDPOINTS.LOGIN, {
         email,
         password,
       });
 
-      if (response.data.status === 'success') {
+      console.log('Login response:', response.data);
+      if (response.status === 200) {
         localStorage.setItem('authToken', response.data.token);
         setIsAuthenticated(true);
         navigate('/'); // Redirect to the dashboard after login

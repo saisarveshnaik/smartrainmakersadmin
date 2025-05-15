@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form } from 'react-bootstrap';
-import axios, { AxiosError } from 'axios';  // Import AxiosError from axios
+import axios from 'axios';  // Import AxiosError from axios
 import '../styles/ViewAdminBalance.css';
 
 const ViewAdminBalance: React.FC = () => {

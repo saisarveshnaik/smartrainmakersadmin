@@ -44,3 +44,20 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+
+
+
+<!-- TODO -->
+
+<!-- 
+
+1️⃣ Admin Income from Matrix and 
+1.2 Reserve Wallet separate to be able to use this for business development, salaries and payments  for different systems expenses. 
+2️⃣ Top Recruiters; Daily, weekly, and monthly (we will use it for competitions)
+3️⃣ Payout Sent
+4️⃣ Total Users on Each Zone (if it's under View Teams, all good)
+5️⃣ Active Users; Daily, weekly, and monthly active users.
+6️⃣ Total Funds Daily, Weekly, and Monthly
+
+ -->

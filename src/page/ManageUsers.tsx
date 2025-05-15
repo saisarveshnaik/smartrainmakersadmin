@@ -1,188 +1,162 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/ManageUsers.css';
-import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
-import axios from 'axios';
-
-interface User {
-    id: number;
-    user_name: string;
-    email: string;
-    email_verified: boolean;
-    payout_wallet: string;
-    premium_level: string;
-    rainmaker_level: string;
-    total_withdrawn: number;
-    created_at: string;
-}
-
-interface UserDetails {
-    user_name: string;
-    password: string;
-    payout_wallet: string;
-}
+import { Table, Button, Alert } from 'react-bootstrap';
+import { ManageUserProvider, useManageUsers } from '../context/ManageUserContext'; // Import the UserContext
+import { useDebounce } from 'use-debounce'; // Import useDebounce
+import { FaFileExport } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
 
 const ManageUsers: React.FC = () => {
-    const [users, setUsers] = useState<User[]>([]);
-    const [showModal, setShowModal] = useState(false);
-    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-    const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-    const [alertMessage, setAlertMessage] = useState<string | null>(null);  // State for alert message
-    const [alertType, setAlertType] = useState<'success' | 'danger' | undefined>(undefined); // Updated state type
+    const navigate = useNavigate();
+
+    const userContext = useManageUsers(); // Ensure correct usage
+    const [alertMessage, setAlertMessage] = useState<string | null>(null);
+    const [alertType, setAlertType] = useState<'success' | 'danger' | undefined>(undefined);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [sortColumn, setSortColumn] = useState<keyof typeof userContext.users[0]>('created_at'); // Default sorting by date
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useDebounce(searchTerm, 300);
+    const ExportIcon = FaFileExport as React.ElementType;
 
     useEffect(() => {
-        fetchUsers();
-    }, []);
+        userContext.fetchUsers();
+    }, []); // Empty dependency array ensures it runs only once
 
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get('http://localhost/smartrainmakers/pages/manage_users_GET.php');
-            setUsers(response.data.users || []);
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
+    const handleViewTeam = (userId: string) => {
+        console.log("View team for user:", userId);
+        navigate(`/view-team/${userId}`); // Navigate to the team page with userId
     };
 
-    const handleShowModal = async (userId: number) => {
-        setSelectedUserId(userId);
-        try {
-            const response = await axios.get(`http://localhost/smartrainmakers/pages/manage_users_popup_GET.php?user_id=${userId}`);
-            setUserDetails(response.data.user_details || null);
-            setShowModal(true);
-        } catch (error) {
-            console.error("Error fetching user details:", error);
-        }
+    const handleExport = () => {
+        // Logic to export user data as CSV
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setUserDetails(null);
-    };
+    const sortedUsers = [...(userContext.users || [])].sort((a, b) => {
+        const valA = a[sortColumn];
+        const valB = b[sortColumn];
 
-    const handleSaveChanges = async () => {
-        if (selectedUserId && userDetails) {
-            const { password, payout_wallet } = userDetails;
-
-            // Prepare form-data
-            const formData = new FormData();
-            formData.append('user_id', selectedUserId.toString());
-            formData.append('password', password);
-            formData.append('payout_wallet', payout_wallet);
-
-            try {
-                const response = await axios.post('http://localhost/smartrainmakers/pages/manage_users_popup_POST.php', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    }
-                });
-
-                // Show success message
-                setAlertMessage('User details updated successfully.');
-                setAlertType('success');
-
-                setShowModal(false);
-                fetchUsers(); // Re-fetch users after updating
-            } catch (error) {
-                console.error("Error updating user details:", error);
-
-                // Show error message
-                setAlertMessage('Failed to update user details. Please try again.');
-                setAlertType('danger');
-            }
+        if (sortColumn === 'created_at') {
+            return sortOrder === 'asc' ? new Date(valA as string).getTime() - new Date(valB as string).getTime() : new Date(valB as string).getTime() - new Date(valA as string).getTime();
         }
+
+        if (typeof valA === 'string' && typeof valB === 'string') {
+            return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        if (typeof valA === 'number' && typeof valB === 'number') {
+            return sortOrder === 'asc' ? valA - valB : valB - valA;
+        }
+        return 0;
+    });
+
+    const filteredUsers = sortedUsers.filter(user =>
+        user.user_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+    const handleSort = (column: keyof typeof userContext.users[0]) => {
+        setSortOrder(prev => (sortColumn === column ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'));
+        setSortColumn(column);
     };
 
     return (
         <div className="container mt-4">
             <h1>Manage Users</h1>
 
-            {/* Displaying the alert message if it exists */}
             {alertMessage && (
                 <Alert variant={alertType} onClose={() => setAlertMessage(null)} dismissible>
                     {alertMessage}
                 </Alert>
             )}
 
+            <div className="search-container">
+                <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Button onClick={handleExport} className="button-export">
+                    <ExportIcon /> Export CSV
+                </Button>
+            </div>
+
             <Table striped bordered hover responsive className="mt-3">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
+                        <th onClick={() => handleSort('user_name')}>Name {sortColumn === 'user_name' && (sortOrder === 'asc' ? '▲' : '▼')}</th>
+                        <th onClick={() => handleSort('email')}>Email {sortColumn === 'email' && (sortOrder === 'asc' ? '▲' : '▼')}</th>
                         <th>Email Verified</th>
-                        <th>Payout Wallet</th>
-                        <th>Premium Level</th>
-                        <th>Rainmaker Level</th>
+                        <th onClick={() => handleSort('payout_wallet')}>Payout Wallet {sortColumn === 'payout_wallet' && (sortOrder === 'asc' ? '▲' : '▼')}</th>
+                        <th onClick={() => handleSort('premium_level')}>Premium Level {sortColumn === 'premium_level' && (sortOrder === 'asc' ? '▲' : '▼')}</th>
+                        <th onClick={() => handleSort('rainmaker_level')}>Rainmaker Level {sortColumn === 'rainmaker_level' && (sortOrder === 'asc' ? '▲' : '▼')}</th>
                         <th>Total Withdrawn</th>
-                        <th>Date Joined</th>
+                        <th onClick={() => handleSort('created_at')}>Date Joined {sortColumn === 'created_at' && (sortOrder === 'asc' ? '▲' : '▼')}</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map(user => (
-                        <tr key={user.id}>
-                            <td>{user.user_name}</td>
-                            <td>{user.email}</td>
-                            <td>{user.email_verified ? "Yes" : "No"}</td>
-                            <td>{user.payout_wallet}</td>
-                            <td>{user.premium_level}</td>
-                            <td>{user.rainmaker_level}</td>
-                            <td>{user.total_withdrawn}</td>
-                            <td>{user.created_at}</td>
-                            <td>
-                                <Button className="view-more-btn" onClick={() => handleShowModal(user.id)}>Edit</Button>
-                            </td>
+                    {currentUsers.length > 0 ? (
+                        currentUsers.map(user => (
+                            <tr key={user._id}>
+                                <td>{user.user_name}</td>
+                                <td>{user.email}</td>
+                                <td>{user.email_verified ? "Yes" : "No"}</td>
+                                <td>{user.payout_wallet.toFixed(2)}</td>
+                                <td>{user.premium_level ?? 0}</td>
+                                <td>{user.rainmaker_level ?? 0}</td>
+                                <td>{user.payout_wallet.toFixed(2)}</td>
+                                <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                                <td>
+                                    <Button className="view-more-btn" onClick={() => handleViewTeam(user._id)}>View Team</Button>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan={9}>No users found</td>
                         </tr>
-                    ))}
+                    )}
                 </tbody>
             </Table>
-
-            <Modal show={showModal} onHide={handleCloseModal} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>Edit User Details</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {userDetails && (
-                        <Form>
-                            <Form.Group className="mb-3" controlId="formUsername">
-                                <Form.Label>Username</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter username"
-                                    defaultValue={userDetails.user_name}
-                                    readOnly
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3" controlId="formPassword">
-                                <Form.Label>Password</Form.Label>
-                                <Form.Control
-                                    type="password"
-                                    placeholder="Enter password"
-                                    value={userDetails.password}
-                                    onChange={(e) => setUserDetails({ ...userDetails, password: e.target.value })}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3" controlId="formWallet">
-                                <Form.Label>User Wallet</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter wallet address"
-                                    value={userDetails.payout_wallet}
-                                    onChange={(e) => setUserDetails({ ...userDetails, payout_wallet: e.target.value })}
-                                />
-                            </Form.Group>
-                        </Form>
-                    )}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>
-                        Close
-                    </Button>
-                    <Button variant="primary" onClick={handleSaveChanges}>
-                        Save Changes
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <div className="pagination-controls">
+                <Button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+                    Previous
+                </Button>
+                <span> Page {currentPage} of {Math.ceil(filteredUsers.length / itemsPerPage)} </span>
+                <input 
+                    type="number" 
+                    value={currentPage} 
+                    onChange={(e) => {
+                        let page = Number(e.target.value);
+                        if (page > 0 && page <= Math.ceil(filteredUsers.length / itemsPerPage)) {
+                            setCurrentPage(page);
+                        }
+                    }} 
+                    min="1" 
+                    max={Math.ceil(filteredUsers.length / itemsPerPage)} 
+                    style={{ width: "80px", textAlign: "center", margin: "0 10px" }} 
+                />
+                <Button onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredUsers.length / itemsPerPage)))} disabled={currentPage >= Math.ceil(filteredUsers.length / itemsPerPage)}>
+                    Next
+                </Button>
+            </div>
         </div>
     );
 };
 
-export default ManageUsers;
+const ManageUsersPage: React.FC = () => {
+    return (
+        <ManageUserProvider>
+            <ManageUsers />
+        </ManageUserProvider>
+    );
+};
+
+export default ManageUsersPage;

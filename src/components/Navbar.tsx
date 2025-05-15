@@ -1,18 +1,15 @@
 // Navbar.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import '../styles/Navbar.css';
-import { FaBell, FaEnvelope, FaUserCircle } from 'react-icons/fa';
+
+// Define icons as React.ElementType
 
 interface NavbarProps {
   toggleSidebar: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const toggleDropdown = () => {
-    setDropdownOpen((prev) => !prev);
-  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -22,21 +19,21 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
       <span className="navbar-brand">Dashboard</span>
 
       {/* Right-aligned Links */}
-      <div className="ml-auto d-flex align-items-center ms-auto">
+      {/* <div className="ml-auto d-flex align-items-center ms-auto">
         <a href="#" className="navbar-link mx-2">
           User
         </a>
         <a href="#" className="navbar-link mx-2">
           Settings
-        </a>
+        </a> */}
 
         {/* Icons Section */}
-        <FaBell className="nav-icon mx-2" />
-        <FaEnvelope className="nav-icon mx-2" />
+        {/* <BellIcon className="nav-icon mx-2" />
+        <EnvelopeIcon className="nav-icon mx-2" /> */}
 
         {/* UserCircle with dropdown */}
-        <div className="nav-item dropdown">
-          <FaUserCircle
+        {/* <div className="nav-item dropdown">
+          <UserCircleIcon
             className="nav-icon user-circle mx-2"
             onClick={toggleDropdown}
             style={{ cursor: 'pointer' }}
@@ -61,7 +58,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
             </ul>
           )}
         </div>
-      </div>
+      </div> */}
     </nav>
   );
 };

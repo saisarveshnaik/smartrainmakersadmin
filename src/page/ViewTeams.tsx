@@ -1,85 +1,142 @@
-import React, { useState } from 'react';
-import { Tab, Nav, Table, Container } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Form } from 'react-bootstrap';
+import axios from 'axios';
 import '../styles/ViewTeams.css';
+import { useParams } from "react-router-dom";
+import { ENDPOINTS } from '../endpoints';
 
 const ViewTeams: React.FC = () => {
-    const [key, setKey] = useState('premium'); // State to manage active tab
+    const { userId } = useParams<{ userId: string }>(); // Extract userId from URL
+    const [selectedLevel, setSelectedLevel] = useState('1');
+    const [selectedZone, setSelectedZone] = useState<'premium' | 'rainmaker'>('premium');
 
-    // Placeholder data for Premium Zone
-    const premiumZoneData = [
-        { username: 'Alice', wallet: '0x123...', joiningDate: '2023-01-01', level: 'Gold' },
-        { username: 'Bob', wallet: '0x456...', joiningDate: '2023-02-15', level: 'Platinum' },
-        { username: 'Charlie', wallet: '0x789...', joiningDate: '2023-03-10', level: 'Silver' },
-    ];
+    const [premiumZoneData, setPremiumZoneData] = useState<any[]>([]);
+    const [rainmakerZoneData, setRainmakerZoneData] = useState<any[]>([]);
 
-    // Placeholder data for Rainmaker Zone
-    const rainmakerZoneData = [
-        { username: 'David', wallet: '0xabc...', joiningDate: '2023-04-05', level: 'Diamond' },
-        { username: 'Eve', wallet: '0xdef...', joiningDate: '2023-05-20', level: 'Gold' },
-        { username: 'Frank', wallet: '0xghi...', joiningDate: '2023-06-25', level: 'Bronze' },
-    ];
+    useEffect(() => {
+        if (!userId) return;
+
+        console.log("Fetching team data for user:", userId);
+
+        axios.get(`${ENDPOINTS.USER_TEAMS}?user_id=${userId}`)
+            .then(response => {
+                if (!response.data) {
+                    console.error('Invalid API response:', response);
+                    return;
+                }
+                const { premiumTeam = [], rainmakerTeam = [] } = response.data || {};
+                setPremiumZoneData(premiumTeam);
+                setRainmakerZoneData(rainmakerTeam);
+            })
+            .catch(error => console.error('Error fetching team data:', error));
+    }, [userId]);
+
+    const filterByLevel = (data: any[] | null | undefined) => {
+        if (!data) return [];
+        console.log("Filtering data for level:", selectedLevel);
+        console.log("Data:", data);
+        console.log("Filtered Data:", data.filter(user => user.level === selectedLevel));
+        return data.filter(user => user.level === selectedLevel);
+    };
+
+    const displayedData = selectedZone === 'premium' ? filterByLevel(premiumZoneData) : filterByLevel(rainmakerZoneData);
 
     return (
         <Container className="mt-4">
-            <h1 className='mb-5'>View Teams</h1>
-            <Tab.Container id="view-teams-tabs" activeKey={key} onSelect={(k) => setKey(k as string)}>
-                <Nav variant="tabs" className="mb-3">
-                    <Nav.Item>
-                        <Nav.Link eventKey="premium">Premium Zone</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="rainmaker">Rainmaker Zone</Nav.Link>
-                    </Nav.Item>
-                </Nav>
-                <Tab.Content>
-                    {/* Premium Zone Table */}
-                    <Tab.Pane eventKey="premium">
-                        <Table striped bordered hover responsive>
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Wallet Address</th>
-                                    <th>Joining Date</th>
-                                    <th>Level</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {premiumZoneData.map((user, index) => (
-                                    <tr key={index}>
-                                        <td>{user.username}</td>
-                                        <td>{user.wallet}</td>
-                                        <td>{user.joiningDate}</td>
-                                        <td>{user.level}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </Tab.Pane>
-                    {/* Rainmaker Zone Table */}
-                    <Tab.Pane eventKey="rainmaker">
-                        <Table striped bordered hover responsive>
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Wallet Address</th>
-                                    <th>Joining Date</th>
-                                    <th>Level</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rainmakerZoneData.map((user, index) => (
-                                    <tr key={index}>
-                                        <td>{user.username}</td>
-                                        <td>{user.wallet}</td>
-                                        <td>{user.joiningDate}</td>
-                                        <td>{user.level}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </Tab.Pane>
-                </Tab.Content>
-            </Tab.Container>
+            <h1 className="mb-4">View Team</h1>
+            
+            {/* Toggle Button for Zone Selection */}
+            <div className="d-flex align-items-center justify-content-between mb-3">
+                <span className="fw-bold select">Select Zone:</span>
+                <Form.Check 
+                    type="switch"
+                    id="zone-toggle"
+                    className='select'
+                    label={selectedZone === 'premium' ? 'Premium Zone' : 'Rainmaker Zone'}
+                    checked={selectedZone === 'premium'}
+                    onChange={() => setSelectedZone(selectedZone === 'premium' ? 'rainmaker' : 'premium')}
+                />
+            </div>
+
+            {/* Level Selection Dropdown */}
+            <Form.Group controlId="levelSelect" className="mb-3">
+                <Form.Label className="fw-bold select">Select Level:</Form.Label>
+                <Form.Select value={selectedLevel} onChange={(e) => setSelectedLevel(e.target.value)}>
+                    <option value="1">Level 1</option>
+                    <option value="2">Level 2</option>
+                    <option value="3">Level 3</option>
+                </Form.Select>
+            </Form.Group>
+
+            {/* Matrix View for Selected Level and Zone */}
+            <div className={`matrix-container ${selectedZone}`}>
+                {displayedData.length === 0 ? (
+                    <p className="text-center text-muted">No users found for this level.</p>
+                ) : (       
+                    selectedZone === 'premium' ?
+                        <div className="col-md-4" key={displayedData[0].level}>
+                          <div className="zonecard">
+                            {/* <h2 className="zonetext">Zone {displayedData[0].level}</h2> */}
+                            
+                      
+                            {/* Always Render Dots (Even for Empty Slots) */}
+                            <div className={`dot middle-dot ${displayedData.length>0 ? "filled" : ""}`}>
+                            </div>
+                      
+                            <div className={`dot left-middle-dot ${displayedData[0].childs[0] ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[0]?.username || "N/A"}</div>
+                            </div>
+                      
+                            <div className={`dot left-left-dot ${(displayedData[0] && displayedData[0].childs[0]?.children[0]) ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[0]?.children[0]?.username || "N/A"}</div>
+                            </div>
+                      
+                            <div className={`dot left-right-dot ${(displayedData[0] && displayedData[0].childs[0]?.children[1]) ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[0]?.children[1]?.username || "N/A"}</div>
+                            </div>
+                      
+                            <div className={`dot right-middle-dot ${displayedData[0].childs[1] ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[1]?.username || "N/A"}</div>
+                            </div>
+                      
+                            <div className={`dot right-left-dot ${(displayedData[0] && displayedData[0].childs[1]?.children[0]) ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[1]?.children[0]?.username || "N/A"}</div>
+                            </div>
+                      
+                            <div className={`dot right-right-dot ${(displayedData[0] && displayedData[0].childs[1]?.children[1]) ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[1]?.children[1]?.username || "N/A"}</div>
+                            </div>
+                          </div>
+                        </div>
+                        :
+                        <div className="col-md-4" key={displayedData[0].level}>
+                          <div className="zonecard">
+                            <h2 className="zonetext">Zone {displayedData[0].level}</h2>
+                            
+                      
+                            {/* Always Render Dots (Even for Empty Slots) */}
+                            <div className={`dot middle-dot ${displayedData.length>0 ? "filled" : ""}`}>
+                            </div>
+                      
+                            <div className={`dot left-left-dot ${(displayedData[0] && displayedData[0].childs[0]) ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[0]?.username || "N/A"}</div>
+                            </div>
+                      
+                            <div className={`dot left-right-dot ${(displayedData[0] && displayedData[0].childs[1]) ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[1]?.username || "N/A"}</div>
+                            </div>
+                      
+                            <div className={`dot right-left-dot ${(displayedData[0] && displayedData[0].childs[2]) ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[2]?.username || "N/A"}</div>
+                            </div>
+                      
+                            <div className={`dot right-right-dot ${(displayedData[0] && displayedData[0].childs[3]) ? "filled" : ""}`}>
+                              <div className="tooltip">User Name: {displayedData[0].childs[3]?.username || "N/A"}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+            </div>
         </Container>
     );
 };

@@ -1,0 +1,82 @@
+.support-page {
+  padding: 20px;
+}
+
+.support-page h1 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #ffffff; /* Changed color from #333 to #ffffff */
+  text-align: center; /* Added text-align property */
+}
+
+.support-page .table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+.support-page .table th,
+.support-page .table td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.support-page .table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.support-page .table td {
+  vertical-align: middle;
+}
+
+.support-page .btn {
+  margin-right: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.support-page .table .action-btn {
+  display: none; /* Hide action buttons by default */
+}
+
+.support-page .table tr[data-status="Open"] .action-btn {
+  display: inline-block; /* Show action buttons only for open tickets */
+}
+
+.support-page .table .description {
+  display: none; /* Hide description column */
+}
+
+.support-page .table tr.expanded .description {
+  display: table-cell; /* Show description on row expansion */
+}
+
+.support-page .table th:nth-child(6),
+.support-page .table td:nth-child(6) {
+  display: table-cell; /* Show Created At column */
+}
+
+.support-page .table th:nth-child(7),
+.support-page .table td:nth-child(7) {
+  display: table-cell; /* Show Closed At column */
+}
+
+.pending-btn {
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+}
+
+.support-page .pagination-controls {
+  margin-top: 20px;
+}
+
+.support-page .pagination-controls label {
+  margin-right: 10px;
+}
+
+.support-page .pagination-controls button {
+  margin-left: 5px;
+}
